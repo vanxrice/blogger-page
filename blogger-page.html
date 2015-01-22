@@ -1,78 +1,61 @@
 <link rel="import" href="../polymer/polymer.html">
 
+<link rel="import" href="../polymer-jsonp/polymer-jsonp.html">
+
+<link rel="import" href="blogger-post.html">
+
 <!--
 Element providing solution to no problem in particular.
 
 ##### Example
 
-    <blogger-page></blogger-page>
+    <blogger-page blogtitle="vxrice"></blogger-page>
 
 @element blogger-page
-@blurb Element providing solution to no problem in particular.
+@blurb Element providing access to a Blogger feed using JSON
 @status alpha
 @homepage http://vanxrice.github.io/blogger-page
+@demo http://vanxrice.github.io/blogger-page/demo.html
 -->
-<polymer-element name="blogger-page" attributes="author fancy">
-  <template>
-    <link rel="stylesheet" href="blogger-page.css">
+<polymer-element name="blogger-page" attributes="blogtitle">
+  <template is="auto binding">
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <polymer-jsonp auto handleAs="json"
+      url="http://vxrice.blogspot.com/feeds/posts/default?alt=json-in-script&callback="
+      response="{{response}}"
+      on-polymer-response="{{onResponse}}">
+    </polymer-jsonp>
+
     <h1>Hello from blogger-page</h1>
+
+    <template if="{{feed}}">
+      <h1>{{feed.title.$t}}</h1>
+    </template>
+
     <content></content>
   </template>
   <script>
     Polymer({
       /**
-       * The `author` attribute sets an initial author
+       * The `blogtitle` attribute sets the blog to fetch data from.
        *
-       * @attribute author
+       * @attribute blogtitle
        * @type string
-       * @default 'Dimitri Glazkov'
+       * @default 'googleblog'
        */
-      author: 'Dimitri Glazkov',
+      blogtitle: 'googleblog',
 
-      /**
-       * `fancy` is a property that does something fancy.
-       *
-       * @property fancy
-       * @type bool
-       * @default false
-       */
-      fancy: false,
-
-      ready: function () {
-        // Ready is a lifecycle callback.
-        // You can do setup work in here.
-        // More info: http://www.polymer-project.org/docs/polymer/polymer.html#lifecyclemethods
-      },
-
-      /**
-       * The `sayHello` method will return a greeting.
-       *
-       * @method sayHello
-       * @param {String} greeting Pass in a specific greeting.
-       * @return {String} Returns a string greeting.
-       */
-      sayHello: function (greeting) {
-        var response = greeting || 'Hello World!';
-        return 'blogger-page says, ' + response;
-      },
-
-      /**
-       * The `blogger-page-lasers-success` event is fired whenever we
-       * call fireLasers.
-       *
-       * @event blogger-page-lasers-success
-       * @param {Object} detail
-       *   @param {string} detail.sound An amazing sound.
-       */
-
-      /**
-       * The `fireLasers` method will fire the lasers. At least
-       * it will dispatch an event that claims lasers were fired :)
-       *
-       * @method fireLasers
-       */
-      fireLasers: function () {
-        this.fire('blogger-page-lasers-success', { sound: 'Pew pew pew!' });
+      onResponse: function(e) {
+        if (this.response) {
+          if (this.response.feed) {
+            this.feed = this.response.feed;
+          }
+        }
       }
     });
   </script>
