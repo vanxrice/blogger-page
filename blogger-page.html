@@ -31,10 +31,14 @@ Element providing solution to no problem in particular.
       on-polymer-response="{{onResponse}}">
     </polymer-jsonp>
 
-    <h1>Hello from blogger-page</h1>
-
     <template if="{{feed}}">
       <h1>{{feed.title.$t}}</h1>
+      <hr/>
+      <div>
+        <template repeat="{{post in feed.entry}}">
+          <blogger-post post="{{post}}"></blogger-post>
+        </template>
+      </div>
     </template>
 
     <content></content>
@@ -54,6 +58,7 @@ Element providing solution to no problem in particular.
         if (this.response) {
           if (this.response.feed) {
             this.feed = this.response.feed;
+            console.log(this.feed);
           }
         }
       }

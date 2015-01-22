@@ -1,16 +1,19 @@
 <link rel="import" href="../polymer/polymer.html">
 
-<polymer-element name="blogger-post" attributes="">
-  <template>
+<polymer-element name="blogger-post" attributes="post">
+  <template is="auto binding" if="{{post}}">
     <style>
       :host {
         display: block;
       }
     </style>
+
+    <h2>{{post.published.$t}}</h2>
   </template>
   <script>
     (function () {
       Polymer({
+        post: null
         // define element prototype here
       });
     })();
