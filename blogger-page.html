@@ -26,7 +26,7 @@ A basic Polymer web component that fetches a Blogger feed over JSON.
     </style>
 
     <polymer-jsonp auto handleAs="json"
-      url="http://vxrice.blogspot.com/feeds/posts/default?alt=json&callback="
+      url="http://{{blogtitle}}.blogspot.com/feeds/posts/default?alt=json&callback="
       response="{{response}}"
       on-polymer-response="{{onResponse}}">
     </polymer-jsonp>
