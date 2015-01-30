@@ -1,66 +1,213 @@
-<link rel="import" href="../polymer/polymer.html">
-
+<link rel="import" href="../core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../font-roboto/roboto.html">
+<link rel="import" href="../paper-shadow/paper-shadow.html">
 <link rel="import" href="../polymer-jsonp/polymer-jsonp.html">
-
+<link rel="import" href="../polymer/polymer.html">
+<script src="../time-elements/time-elements.js"></script>
 <link rel="import" href="blogger-post.html">
 
 <!--
-A basic Polymer web component that fetches a Blogger feed over JSON.
+A basic Polymer web component that fetches posts from Blogger over JSON.
+
+Uses Blogger APIv3, which requires an API key. See Google's documentation on
+how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/using#APIKey).
 
 ##### Example
 
-    <blogger-page blogtitle="vxrice"></blogger-page>
+    <blogger-page blogId="3730718121569395510" apiKey="AIzaSyBAsq-ZjBWJ9AdmX4QaxvoYovzqX-7_Yzg"
+      contentPreviewMaxChars="140" maxPostCount="3"></blogger-page>
 
 @element blogger-page
-@blurb A basic Polymer web component that fetches a Blogger feed over JSON.
+@blurb A basic Polymer web component that fetches a Blogger post list over JSON.
 @status alpha
 @homepage http://vanxrice.github.io/blogger-page
 @demo http://vanxrice.github.io/blogger-page/demo.html
 -->
-<polymer-element name="blogger-page" attributes="blogtitle">
+<polymer-element name="blogger-page" attributes="blogId, apiKey, contentPreviewMaxChars, maxPostCount">
   <template is="auto binding">
     <style>
       :host {
         display: block;
       }
+
+      .card-container {
+        position: absolute;
+        top: 50px;
+        right: 0;
+        left: 0;
+        text-align: center;
+      }
+
+      .card {
+        margin: 0 10px 20px 10px;
+        text-align: start;
+        background-color: #fff;
+        max-width: 280px;
+        min-height: 200px;
+      }
+
+      .italic {
+        font-style: italic;
+      }
+      
+      .inverse-heading {
+        background-color: rgba(51,51,51,1);
+        color: rgba(255,255,255,1);
+        padding: 20px;
+        margin-bottom: 0px;
+        padding-bottom: 2px;
+        font-size: 20px;
+        letter-spacing: 2px;
+      }
+
+      .header {
+        margin-top: 0;
+      }
+
+      .post-tags {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .post-tag {
+        padding-right: 5px;
+      }
+
+      .text-body {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 25px;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .text-subhead {
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 32px;
+      }
+
+      .weight-400 {
+        font-weight: 400;
+      }
     </style>
 
     <polymer-jsonp auto handleAs="json"
-      url="http://{{blogtitle}}.blogspot.com/feeds/posts/default?alt=json&callback="
+      url="https://www.googleapis.com/blogger/v3/blogs/{{blogId}}/posts?key={{apiKey}}&callback="
       response="{{response}}"
       on-polymer-response="{{onResponse}}">
     </polymer-jsonp>
 
-    <template if="{{feed}}">
-      <h1>{{feed.title.$t}}</h1>
-      <hr/>
+    <!-- https://www.googleapis.com/blogger/v3/blogs/blogId/posts/postId&view=READER -->
+
+    <template if="{{posts}}">
       <div>
-        <template repeat="{{post in feed.entry}}">
-          <blogger-post post="{{post}}"></blogger-post>
-          <hr/>
-        </template>
+        <core-animated-pages id="pages" flex selected="0" transitions="cross-fade-all hero-transition" on-core-animated-pages-transition-end="{{complete}}">
+
+          <section>
+            <div class="card-container" hero-p on-tap="{{onTap}}" horizontal layout start wrap around-justified>
+              <template repeat="{{post in posts}}">
+                <paper-shadow z="2" class="card" hero-id="{{post.id}}" hero?="{{selectedPost === post }}">
+                  <h1 class="inverse-heading header">{{post.title}}</h1>
+                  <div>
+                    <div class="post-tags" horizontal layout wrap>
+                      <template repeat="{{post.labels as tag}}">
+                        <div class="post-tag text-subhead">{{'#' + tag}}</div>
+                      </template>
+                    </div>
+                    <div class="card-preview text-body">{{htmlToTextAndTrim(post.content)}}</div>
+                    <div horizontal layout end>
+                      <time flex class="text-body italic weight-400" is="relative-time" datetime="{{post.published}}"></time>
+                      <paper-icon-button mini noink end icon="open-in-new"></paper-icon-button>
+                    </div>
+                  </div>
+                </paper-shadow>
+
+                <!-- <template repeat="{{post in posts}}">
+                  <section vertical layout>
+                    <div class="view" flex vertical center center-justified layout hero-id="{{post.id}}" hero?="{{$.pages.selected === item + 1 || $.pages.selected === 0}}"><span cross-fade>{{post.title}}</span></div>
+                  </section>
+                </template> -->
+              </template>
+            </div>
+          </section>
+
+        </core-animated-pages>
       </div>
     </template>
 
     <content></content>
   </template>
   <script>
-    Polymer({
+    Polymer('blogger-page', {
       /**
-       * The `blogtitle` attribute sets the blog to fetch data from.
+       * The `blogId` attribute sets the blog to fetch data from.
        *
-       * @attribute blogtitle
+       * @attribute blogId
        * @type string
-       * @default 'googleblog'
+       * @default ''
        */
-      blogtitle: 'googleblog',
+      blogId: '',
+
+      /**
+       * The `apiKey` attribute sets the apiKey for REST calls
+       *
+       * @attribute apiKey
+       * @type string
+       * @default ''
+       */
+      apiKey: '',
+
+      /**
+       * The `contentPreviewMaxChars` attribute sets the length for the content preview, respects word boundaries.
+       *
+       * @attribute contentPreviewMaxChars
+       * @type int
+       * @default 140
+       */
+      contentPreviewMaxChars: 140, // cuz twitter
+
+      /**
+       * The `maxPostCount` attribute sets the number of posts to display
+       *
+       * @attribute maxPostCount
+       * @type int
+       * @default null
+       */
+      maxPostCount: null,
+
+      selectedPost: null,
+
+      htmlToTextAndTrim: function(htmlStr) {
+        if (htmlStr) {
+          var div = document.createElement("div");
+          div.innerHTML = htmlStr;
+          var text = div.textContent || div.innerText || "";
+          if (text && text.length > this.contentPreviewMaxChars) {
+            var trimmedString = text.substr(0, this.contentPreviewMaxChars);
+            trimmedString = trimmedString.substr(0, Math.min(trimmedString.length, trimmedString.lastIndexOf(" ")))
+            return trimmedString + " …";
+          } else {
+            return text;
+          }
+        }
+        return "";
+      },
 
       onResponse: function(e) {
         if (this.response) {
-          if (this.response.feed) {
-            this.feed = this.response.feed;
+          if (this.response.kind === 'blogger#postList' && this.response.items) {
+            if (this.maxPostCount && this.response.items.length > this.maxPostCount) {
+              this.posts = this.response.items.slice(0, this.maxPostCount); // remove posts
+            } else {
+              this.posts = this.response.items;
+            }
           }
         }
+      },
+
+      onTap: function(e) {
+        console.log(e);
       }
     });
   </script>
