@@ -48,7 +48,7 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
         margin: 0 10px 20px 10px;
         text-align: start;
         background-color: #fff;
-        max-width: 280px;
+        max-width: 320px;
         min-height: 200px;
       }
 
@@ -73,10 +73,18 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
         margin-top: 0;
         margin-bottom: 0px;
       }
+
+      .corner-button {
+
+      }
       
       .blogger-card-header {
         padding: 20px;
         padding-bottom: 2px;
+      }
+
+      .blogger-content-header {
+        padding-top: 5px;
       }
 
       .post-tags {
@@ -88,6 +96,11 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
         padding-right: 5px;
       }
 
+      .text-title {
+        font-size: 20px;
+        font-weight: 600;
+      }
+
       .text-body {
         font-size: 14px;
         font-weight: 400;
@@ -97,13 +110,9 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
       }
 
       .text-subhead {
-        font-size: 18px;
-        font-weight: 600;
-        line-height: 32px;
-      }
-
-      .weight-400 {
+        font-size: 16px;
         font-weight: 400;
+        line-height: 32px;
       }
     </style>
 
@@ -123,7 +132,7 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
           <section class="card-container" fit hero-p horizontal layout start wrap around-justified>
             <template repeat="{{post in posts}}">
               <paper-shadow z="2" class="card">
-                <h1 class="header-inverse blogger-card-header">{{post.title}}</h1>
+                <div flex class="text-title header-inverse blogger-card-header">{{post.title}}</div>
                 <div>
                   <div class="post-tags" horizontal layout wrap>
                     <template repeat="{{post.labels as tag}}">
@@ -132,7 +141,7 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
                   </div>
                   <div class="card-preview text-body">{{htmlToTextAndTrim(post.content)}}</div>
                   <div horizontal layout end>
-                    <time flex class="text-body italic weight-400" is="relative-time" datetime="{{post.published}}"></time>
+                    <time flex class="text-body italic" is="relative-time" datetime="{{post.published}}"></time>
                     <paper-icon-button mini noink end icon="open-in-new" hero?="{{$.pages.selected === post.id}}" hero-id="{{post.id}}" on-tap="{{transition}}"></paper-icon-button>
                   </div>
                 </div>
@@ -143,15 +152,17 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
           <section>
             <paper-shadow z="2">
               <div flex vertical layout hero hero-id="{{selectedPost.id}}">
-                <core-toolbar class="header-inverse tall">
+                <core-toolbar class="header-inverse tall blogger-content-header">
                   <core-icon-button class="white-icon" icon="arrow-back" on-tap="{{transition}}"></core-icon-button>
-                  <span flex>{{selectedPost.title}}</span>
-                  <a href="{{selectedPost.url}}"><core-icon-button class="white-icon" icon="open-in-browser"></core-icon-button></a>
-                  <time flex class="italic weight-400 middle indent" is="relative-time" datetime="{{selectedPost.published}}"></time>
-                  <div class="bottom indent" horizontal layout wrap>
+                  <span flex></span>
+                  <a href="{{selectedPost.url}}"><core-icon-button class="white-icon corner-button" icon="open-in-browser"></core-icon-button></a>
+
+                  <span class="text-title middle" flex>{{selectedPost.title}}</span>
+                  <div class="bottom" horizontal layout wrap>
                     <template repeat="{{selectedPost.labels as tag}}">
                       <div class="post-tag text-subhead">{{'#' + tag}}</div>
                     </template>
+                    <time class="italic text-subhead" is="relative-time" datetime="{{selectedPost.published}}"></time>
                   </div>
                 </core-toolbar>
               </div>  
