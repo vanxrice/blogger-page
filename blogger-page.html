@@ -1,9 +1,15 @@
-<link rel="import" href="../core-animated-pages/core-animated-pages.html">
-<link rel="import" href="../font-roboto/roboto.html">
-<link rel="import" href="../paper-shadow/paper-shadow.html">
-<link rel="import" href="../polymer-jsonp/polymer-jsonp.html">
 <link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../core-icon-button/core-icon-button.html">
+<link rel="import" href="../core-icons/core-icons.html">
+<link rel="import" href="../core-toolbar/core-toolbar.html">
+<link rel="import" href="../paper-shadow/paper-shadow.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../polymer-jsonp/polymer-jsonp.html">
+
 <script src="../time-elements/time-elements.js"></script>
+
 <link rel="import" href="blogger-post.html">
 
 <!--
@@ -25,13 +31,13 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
 -->
 <polymer-element name="blogger-page" attributes="blogId, apiKey, contentPreviewMaxChars, maxPostCount">
   <template is="auto binding">
-    <style>
+    <style shim-shadowdom>
       :host {
         display: block;
+        position: relative;
       }
 
       .card-container {
-        position: absolute;
         top: 50px;
         right: 0;
         left: 0;
@@ -46,22 +52,31 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
         min-height: 200px;
       }
 
+      .post-content {
+        background-color: #fff;
+        padding: 20px;
+      }
+
       .italic {
         font-style: italic;
       }
-      
-      .inverse-heading {
-        background-color: rgba(51,51,51,1);
+
+      .white-icon {
         color: rgba(255,255,255,1);
-        padding: 20px;
-        margin-bottom: 0px;
-        padding-bottom: 2px;
-        font-size: 20px;
-        letter-spacing: 2px;
       }
 
-      .header {
+      .header-inverse {
+        background-color: rgba(51,51,51,1);
+        color: rgba(255,255,255,1);
+        font-size: 20px;
+        letter-spacing: 2px;
         margin-top: 0;
+        margin-bottom: 0px;
+      }
+      
+      .blogger-card-header {
+        padding: 20px;
+        padding-bottom: 2px;
       }
 
       .post-tags {
@@ -101,35 +116,48 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
     <!-- https://www.googleapis.com/blogger/v3/blogs/blogId/posts/postId&view=READER -->
 
     <template if="{{posts}}">
-      <div>
-        <core-animated-pages id="pages" flex selected="0" transitions="cross-fade-all hero-transition" on-core-animated-pages-transition-end="{{complete}}">
+      <div flex>
+        <core-animated-pages id="pages" flex selected="{{page}}" transitions="cross-fade-all hero-transition"
+          on-core-animated-pages-transition-end="{{transitionend}}" on-core-animated-pages-transition-prepare="{{prepare}}">
+
+          <section class="card-container" fit hero-p horizontal layout start wrap around-justified>
+            <template repeat="{{post in posts}}">
+              <paper-shadow z="2" class="card">
+                <h1 class="header-inverse blogger-card-header">{{post.title}}</h1>
+                <div>
+                  <div class="post-tags" horizontal layout wrap>
+                    <template repeat="{{post.labels as tag}}">
+                      <div class="post-tag text-subhead">{{'#' + tag}}</div>
+                    </template>
+                  </div>
+                  <div class="card-preview text-body">{{htmlToTextAndTrim(post.content)}}</div>
+                  <div horizontal layout end>
+                    <time flex class="text-body italic weight-400" is="relative-time" datetime="{{post.published}}"></time>
+                    <paper-icon-button mini noink end icon="open-in-new" hero?="{{$.pages.selected === post.id}}" hero-id="{{post.id}}" on-tap="{{transition}}"></paper-icon-button>
+                  </div>
+                </div>
+              </paper-shadow>
+            </template>
+          </section>
 
           <section>
-            <div class="card-container" hero-p on-tap="{{onTap}}" horizontal layout start wrap around-justified>
-              <template repeat="{{post in posts}}">
-                <paper-shadow z="2" class="card" hero-id="{{post.id}}" hero?="{{selectedPost === post }}">
-                  <h1 class="inverse-heading header">{{post.title}}</h1>
-                  <div>
-                    <div class="post-tags" horizontal layout wrap>
-                      <template repeat="{{post.labels as tag}}">
-                        <div class="post-tag text-subhead">{{'#' + tag}}</div>
-                      </template>
-                    </div>
-                    <div class="card-preview text-body">{{htmlToTextAndTrim(post.content)}}</div>
-                    <div horizontal layout end>
-                      <time flex class="text-body italic weight-400" is="relative-time" datetime="{{post.published}}"></time>
-                      <paper-icon-button mini noink end icon="open-in-new"></paper-icon-button>
-                    </div>
+            <paper-shadow z="2">
+              <div flex vertical layout hero hero-id="{{selectedPost.id}}">
+                <core-toolbar class="header-inverse tall">
+                  <core-icon-button class="white-icon" icon="arrow-back" on-tap="{{transition}}"></core-icon-button>
+                  <span flex>{{selectedPost.title}}</span>
+                  <a href="{{selectedPost.url}}"><core-icon-button class="white-icon" icon="open-in-browser"></core-icon-button></a>
+                  <time flex class="italic weight-400 middle indent" is="relative-time" datetime="{{selectedPost.published}}"></time>
+                  <div class="bottom indent" horizontal layout wrap>
+                    <template repeat="{{selectedPost.labels as tag}}">
+                      <div class="post-tag text-subhead">{{'#' + tag}}</div>
+                    </template>
                   </div>
-                </paper-shadow>
+                </core-toolbar>
+              </div>  
 
-                <!-- <template repeat="{{post in posts}}">
-                  <section vertical layout>
-                    <div class="view" flex vertical center center-justified layout hero-id="{{post.id}}" hero?="{{$.pages.selected === item + 1 || $.pages.selected === 0}}"><span cross-fade>{{post.title}}</span></div>
-                  </section>
-                </template> -->
-              </template>
-            </div>
+              <div id="postHeroInsert" class="post-content"></div>
+            </paper-shadow>
           </section>
 
         </core-animated-pages>
@@ -176,6 +204,8 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
        */
       maxPostCount: null,
 
+      page: 0,
+
       selectedPost: null,
 
       htmlToTextAndTrim: function(htmlStr) {
@@ -206,8 +236,23 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
         }
       },
 
-      onTap: function(e) {
-        console.log(e);
+      transition: function(e) {
+        if (this.page === 0 && e.target.templateInstance.model.post) {
+          this.selectedPost = e.target.templateInstance.model.post;
+
+          // find insertion point, remove child elements, create template, insert html
+          var insertDiv = this.shadowRoot.querySelector('#postHeroInsert');
+          while (insertDiv.firstChild) {
+            insertDiv.removeChild(insertDiv.firstChild);
+          }
+          var t = document.createElement('template');
+          t.innerHTML = this.selectedPost.content;
+          insertDiv.appendChild(this.instanceTemplate(t));
+
+          this.page = 1;
+        } else {
+          this.page = 0;
+        }
       }
     });
   </script>
