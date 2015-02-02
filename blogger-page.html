@@ -146,7 +146,6 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
 
       onResponse: function(e) {
         if (this.response) {
-          console.log(this.response);
           if (this.response.kind === 'blogger#postList' && this.response.items) {
             if (this.maxPostCount && this.response.items.length > this.maxPostCount) {
               this.posts = this.response.items.slice(0, this.maxPostCount); // remove posts
