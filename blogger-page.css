@@ -76,3 +76,8 @@
   font-weight: 400;
   line-height: 32px;
 }
+
+core-animated-pages /deep/ :host {
+  display: block;
+  position: relative;
+}
