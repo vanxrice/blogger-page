@@ -11,23 +11,24 @@
 <script src="../time-elements/time-elements.js"></script>
 
 <!--
-A Polymer web component that fetches posts from Blogger over JSON.
+A Polymer web component that fetches posts from Blogger, displays blog post previews as a grid of cards. Preview cards expand to a full content view and link to the blogger source post.
 
-Uses Blogger APIv3, which requires an API key. See Google's documentation on
-how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/using#APIKey).
+Uses Blogger APIv3, which requires an API key. See Google's documentation on how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/using#APIKey).
+
+Warning: this project uses core-animated-pages, which causes some weird height issues I haven't been able to resolve ([see post on StackOverflow](http://stackoverflow.com/questions/28237391/polymer-core-animated-pages-setting-inside-elements-height-to-0)). This element is best used at the bottom of a page. If you want to embed inside a page, you must set a static height. See the demo.
 
 ##### Example
 
-    <blogger-page blogId="3730718121569395510" apiKey="AIzaSyBAsq-ZjBWJ9AdmX4QaxvoYovzqX-7_Yzg"
-      contentPreviewMaxChars="140" maxPostCount="3"></blogger-page>
+    <blogger-page blogId="3730718121569395510" apiKey="yourapikey"
+      maxPreviewLength="200" maxPostCount="3">
 
 @element blogger-page
 @blurb A basic Polymer web component that fetches a Blogger post list over JSON.
 @status alpha
-@homepage http://vanxrice.github.io/blogger-page
-@demo http://vanxrice.github.io/blogger-page/demo.html
+@homepage http://vanxrice.github.io/blogger-page/components/blogger-page/
+@demo http://vanxrice.github.io/blogger-page/components/blogger-page/demo.html
 -->
-<polymer-element name="blogger-page" attributes="blogId, apiKey, contentPreviewMaxChars, maxPostCount">
+<polymer-element name="blogger-page" attributes="blogId, apiKey, maxPreviewLength, maxPostCount, response">
   <template is="auto binding">
     <link rel="stylesheet" href="blogger-page.css" shim-shadowdom>
 
@@ -89,7 +90,7 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
   <script>
     Polymer('blogger-page', {
       /**
-       * The `blogId` attribute sets the blog to fetch data from.
+       * The `blogId` attribute sets the blog to fetch data from, you can find your blogId on the Blogger site.
        *
        * @attribute blogId
        * @type string
@@ -98,7 +99,7 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
       blogId: '',
 
       /**
-       * The `apiKey` attribute sets the apiKey for REST calls
+       * The `apiKey` attribute sets the Blogger v3 api key for REST calls.
        *
        * @attribute apiKey
        * @type string
@@ -107,22 +108,32 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
       apiKey: '',
 
       /**
-       * The `contentPreviewMaxChars` attribute sets the length for the content preview, respects word boundaries.
+       * The `maxPreviewLength` attribute sets the length for the content preview, respects word boundaries.
        *
-       * @attribute contentPreviewMaxChars
+       * @attribute maxPreviewLength
        * @type int
        * @default 140
        */
-      contentPreviewMaxChars: 140, // cuz twitter
+      maxPreviewLength: 140, // cuz twitter
 
       /**
-       * The `maxPostCount` attribute sets the number of posts to display
+       * The `maxPostCount` attribute sets the number of posts to display as a card preview, default previews all posts.
        *
        * @attribute maxPostCount
        * @type int
        * @default null
        */
       maxPostCount: null,
+
+      /**
+       * The `response` attribute is the response object from Blogger, you may alternatively use this to set the
+       * response manually.
+       *
+       * @attribute response
+       * @type obj
+       * @default null
+       */
+      response: null,
 
       page: 0,
 
@@ -133,8 +144,9 @@ how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/
           var div = document.createElement("div");
           div.innerHTML = htmlStr;
           var text = div.textContent || div.innerText || "";
-          if (text && text.length > this.contentPreviewMaxChars) {
-            var trimmedString = text.substr(0, this.contentPreviewMaxChars);
+          if (text && text.length > this.maxPreviewLength) {
+            // trim and respect word boundaries
+            var trimmedString = text.substr(0, this.maxPreviewLength);
             trimmedString = trimmedString.substr(0, Math.min(trimmedString.length, trimmedString.lastIndexOf(" ")))
             return trimmedString + " …";
           } else {
