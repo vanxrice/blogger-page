@@ -1,11 +1,15 @@
 # &lt;blogger-page&gt;
 A Polymer web component that fetches posts from Blogger, displays blog post previews as a grid of cards. Preview cards expand to a full content view and link to the blogger source post.
 
+The response object is exposed as `response`, which enables you to use the response outside of the element.
+
 **Uses Blogger APIv3, which requires an API key. See Google's documentation on how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/using#APIKey).**
 
 Warning: this project uses core-animated-pages, which causes some weird height issues I haven't been able to resolve ([see post on StackOverflow](http://stackoverflow.com/questions/28237391/polymer-core-animated-pages-setting-inside-elements-height-to-0)). This element is best used at the bottom of a page. If you want to embed inside a page, you must set a static height. See the demo.
 
 See the [component page](http://vanxrice.github.io/blogger-page/components/blogger-page) for more information.
+
+If you are interested in using this project, I encourage you to fork and customize to your liking.
 
 ## Live demo
 See the [demo page](http://vanxrice.github.io/blogger-page/components/blogger-page/demo.html).
@@ -17,7 +21,6 @@ Available on [Bower](http://bower.io) as **blogger-page**.
 Add to bower.json:
 ```json
 {
-  // …
   "dependencies": {
     "blogger-page": "~0.2.0"
   }

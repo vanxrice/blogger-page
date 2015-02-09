@@ -1,6 +1,6 @@
 {
   "name": "blogger-page",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "keywords": [
     "seed",
     "polymer",
@@ -8,9 +8,10 @@
   ],
   "main": "blogger-page.html",
   "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.4",
+
     "core-elements": "Polymer/core-elements#~0.5.4",
     "paper-elements": "Polymer/paper-elements#~0.5.4",
-    "polymer": "Polymer/polymer#^0.5.1",
     "polymer-jsonp": "Polymer/polymer-jsonp#~0.3.0",
     "time-elements": "~0.4.0"
   },
