@@ -64,16 +64,16 @@ Warning: this project uses core-animated-pages, which causes some weird height i
         <section fit>
           <paper-shadow z="2">
             <div flex vertical layout hero hero-id="{{selectedPost.id}}">
-              <core-toolbar class="header-inverse tall blogger-content-header">
+              <core-toolbar class="header-inverse medium-tall blogger-content-header">
                 <core-icon-button class="white-icon" icon="arrow-back" on-tap="{{transition}}"></core-icon-button>
-                <span flex></span>
+                <span class="text-title" flex>{{selectedPost.title}}</span>
                 <a href="{{selectedPost.url}}"><core-icon-button class="white-icon corner-button" icon="open-in-browser"></core-icon-button></a>
 
-                <span class="text-title middle" flex>{{selectedPost.title}}</span>
-                <div class="bottom" horizontal layout wrap>
+                <div class="bottom" horizontal layout wrap flex>
                   <template repeat="{{selectedPost.labels as tag}}">
                     <div class="post-tag text-subhead">{{'#' + tag}}</div>
                   </template>
+                  <span flex></span>
                   <time class="italic text-subhead" is="relative-time" datetime="{{selectedPost.published}}"></time>
                 </div>
               </core-toolbar>
