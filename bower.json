@@ -1,0 +1,11 @@
+{
+  "name": "blogger-page#gh-pages",
+  "private": true,
+  "resolutions": {
+    "polymer": "^0.5.4",
+    "core-component-page": "^0.5"
+  },
+  "dependencies": {
+    "blogger-page": "vanxrice/blogger-page#master"
+  }
+}

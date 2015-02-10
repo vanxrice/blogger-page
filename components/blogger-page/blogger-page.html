@@ -1,0 +1,191 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../core-icon-button/core-icon-button.html">
+<link rel="import" href="../core-icons/core-icons.html">
+<link rel="import" href="../core-toolbar/core-toolbar.html">
+<link rel="import" href="../paper-shadow/paper-shadow.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../polymer-jsonp/polymer-jsonp.html">
+
+<script src="../time-elements/time-elements.js"></script>
+
+<!--
+A Polymer web component that fetches posts from Blogger, displays blog post previews as a grid of cards. Preview cards expand to a full content view and link to the blogger source post.
+
+Uses Blogger APIv3, which requires an API key. See Google's documentation on how to obtain a Blogger API key (https://developers.google.com/blogger/docs/3.0/using#APIKey).
+
+Warning: this project uses core-animated-pages, which causes some weird height issues I haven't been able to resolve ([see post on StackOverflow](http://stackoverflow.com/questions/28237391/polymer-core-animated-pages-setting-inside-elements-height-to-0)). This element is best used at the bottom of a page. If you want to embed inside a page, you must set a static height. See the demo.
+
+##### Example
+
+    <blogger-page blogId="3730718121569395510" apiKey="yourapikey"
+      maxPreviewLength="200" maxPostCount="3">
+
+@element blogger-page
+@blurb A basic Polymer web component that fetches a Blogger post list over JSON.
+@status alpha
+@homepage http://vanxrice.github.io/blogger-page/components/blogger-page/
+@demo http://vanxrice.github.io/blogger-page/components/blogger-page/demo.html
+-->
+<polymer-element name="blogger-page" attributes="blogId, apiKey, maxPreviewLength, maxPostCount, response">
+  <template is="auto binding">
+    <link rel="stylesheet" href="blogger-page.css" shim-shadowdom>
+
+    <polymer-jsonp auto handleAs="json"
+      url="https://www.googleapis.com/blogger/v3/blogs/{{blogId}}/posts?key={{apiKey}}&callback="
+      response="{{response}}"
+      on-polymer-response="{{onResponse}}">
+    </polymer-jsonp>
+
+      <core-animated-pages style="position: relative" id="pages" selected="{{page}}" transitions="cross-fade-all hero-transition"
+        on-core-animated-pages-transition-end="{{transitionend}}" on-core-animated-pages-transition-prepare="{{prepare}}">
+
+        <section fit class="card-container" hero-p horizontal layout start wrap around-justified>
+          <template repeat="{{post in posts}}">
+            <paper-shadow z="2" class="card">
+              <div flex class="text-title header-inverse blogger-card-header">{{post.title}}</div>
+              <div>
+                <div class="post-tags" horizontal layout wrap>
+                  <template repeat="{{post.labels as tag}}">
+                    <div class="post-tag text-subhead">{{'#' + tag}}</div>
+                  </template>
+                </div>
+                <div class="card-preview text-body">{{htmlToTextAndTrim(post.content)}}</div>
+                <div horizontal layout end>
+                  <time flex class="text-body italic" is="relative-time" datetime="{{post.published}}"></time>
+                  <paper-icon-button mini noink end icon="open-in-new" hero?="{{$.pages.selected === post.id}}" hero-id="{{post.id}}" on-tap="{{transition}}"></paper-icon-button>
+                </div>
+              </div>
+            </paper-shadow>
+          </template>
+        </section>
+
+        <section fit>
+          <paper-shadow z="2">
+            <div flex vertical layout hero hero-id="{{selectedPost.id}}">
+              <core-toolbar class="header-inverse tall blogger-content-header">
+                <core-icon-button class="white-icon" icon="arrow-back" on-tap="{{transition}}"></core-icon-button>
+                <span flex></span>
+                <a href="{{selectedPost.url}}"><core-icon-button class="white-icon corner-button" icon="open-in-browser"></core-icon-button></a>
+
+                <span class="text-title middle" flex>{{selectedPost.title}}</span>
+                <div class="bottom" horizontal layout wrap>
+                  <template repeat="{{selectedPost.labels as tag}}">
+                    <div class="post-tag text-subhead">{{'#' + tag}}</div>
+                  </template>
+                  <time class="italic text-subhead" is="relative-time" datetime="{{selectedPost.published}}"></time>
+                </div>
+              </core-toolbar>
+            </div>  
+
+            <div id="postHeroInsert" class="post-content"></div>
+          </paper-shadow>
+        </section>
+
+      </core-animated-pages>
+
+    <content></content>
+  </template>
+  <script>
+    Polymer('blogger-page', {
+      /**
+       * The `blogId` attribute sets the blog to fetch data from, you can find your blogId on the Blogger site.
+       *
+       * @attribute blogId
+       * @type string
+       * @default ''
+       */
+      blogId: '',
+
+      /**
+       * The `apiKey` attribute sets the Blogger v3 api key for REST calls.
+       *
+       * @attribute apiKey
+       * @type string
+       * @default ''
+       */
+      apiKey: '',
+
+      /**
+       * The `maxPreviewLength` attribute sets the length for the content preview, respects word boundaries.
+       *
+       * @attribute maxPreviewLength
+       * @type int
+       * @default 140
+       */
+      maxPreviewLength: 140, // cuz twitter
+
+      /**
+       * The `maxPostCount` attribute sets the number of posts to display as a card preview, default previews all posts.
+       *
+       * @attribute maxPostCount
+       * @type int
+       * @default null
+       */
+      maxPostCount: null,
+
+      /**
+       * The `response` attribute is the response object from Blogger, you may alternatively use this to set the
+       * response manually.
+       *
+       * @attribute response
+       * @type obj
+       * @default null
+       */
+      response: null,
+
+      page: 0,
+
+      selectedPost: null,
+
+      htmlToTextAndTrim: function(htmlStr) {
+        if (htmlStr) {
+          var div = document.createElement("div");
+          div.innerHTML = htmlStr;
+          var text = div.textContent || div.innerText || "";
+          if (text && text.length > this.maxPreviewLength) {
+            // trim and respect word boundaries
+            var trimmedString = text.substr(0, this.maxPreviewLength);
+            trimmedString = trimmedString.substr(0, Math.min(trimmedString.length, trimmedString.lastIndexOf(" ")))
+            return trimmedString + " …";
+          } else {
+            return text;
+          }
+        }
+        return "";
+      },
+
+      onResponse: function(e) {
+        if (this.response) {
+          if (this.response.kind === 'blogger#postList' && this.response.items) {
+            if (this.maxPostCount && this.response.items.length > this.maxPostCount) {
+              this.posts = this.response.items.slice(0, this.maxPostCount); // remove posts
+            } else {
+              this.posts = this.response.items;
+            }
+          }
+        }
+      },
+
+      transition: function(e) {
+        if (this.page === 0 && e.target.templateInstance.model.post) {
+          this.selectedPost = e.target.templateInstance.model.post;
+
+          // find insertion point, remove child elements, create template, insert html
+          var insertDiv = this.shadowRoot.querySelector('#postHeroInsert');
+          while (insertDiv.firstChild) {
+            insertDiv.removeChild(insertDiv.firstChild);
+          }
+          var t = document.createElement('template');
+          t.innerHTML = this.selectedPost.content;
+          insertDiv.appendChild(this.instanceTemplate(t));
+
+          this.page = 1;
+        } else {
+          this.page = 0;
+        }
+      }
+    });
+  </script>
+</polymer-element>

@@ -1,0 +1,34 @@
+{
+  "name": "blogger-page",
+  "keywords": [
+    "seed",
+    "polymer",
+    "web-components"
+  ],
+  "main": "blogger-page.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.4",
+    "core-elements": "Polymer/core-elements#~0.5.4",
+    "paper-elements": "Polymer/paper-elements#~0.5.4",
+    "polymer-jsonp": "Polymer/polymer-jsonp#~0.3.0",
+    "time-elements": "~0.4.0"
+  },
+  "devDependencies": {
+    "web-component-tester": "Polymer/web-component-tester#^2.0.0"
+  },
+  "resolutions": {
+    "polymer": "^0.5.4",
+    "core-component-page": "^0.5"
+  },
+  "homepage": "https://github.com/vanxrice/blogger-page",
+  "_release": "8f15a14ce9",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "8f15a14ce9a764b5631eec1488fa24154454184c"
+  },
+  "_source": "git://github.com/vanxrice/blogger-page.git",
+  "_target": "master",
+  "_originalSource": "vanxrice/blogger-page",
+  "_direct": true
+}

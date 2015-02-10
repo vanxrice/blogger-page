@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>blogger-page Demo</title>
+    <script src="../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="blogger-page.html">
+  </head>
+  <body unresolved>
+    <p><b>Warning: this project uses core-animated-pages, which causes some weird height issues I haven't been able to resolve (<a href="http://stackoverflow.com/questions/28237391/polymer-core-animated-pages-setting-inside-elements-height-to-0">see post on StackOverflow</a>).</b> This element is best used at the bottom of a page. If you want to embed inside a page, you must set a static height. See the demo below.</p>
+    <p>An `blogger-page` looks like this (limiting posts to 1, preview text characters 100):</p>
+    <blogger-page blogId="3730718121569395510" apiKey="AIzaSyBAsq-ZjBWJ9AdmX4QaxvoYovzqX-7_Yzg" maxPreviewLength="100" maxPostCount="2" style="height: 500px"></blogger-page>
+
+    <p>Display all posts:</p>
+    <blogger-page blogId="3730718121569395510" apiKey="AIzaSyBAsq-ZjBWJ9AdmX4QaxvoYovzqX-7_Yzg"></blogger-page>
+  </body>
+</html>
